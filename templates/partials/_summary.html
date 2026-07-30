@@ -1,0 +1,29 @@
+<div id="summary" class="summary">
+    <div class="stat">
+        <span class="label">Бюджет / день</span>
+        <span class="value">{{ settings.daily_budget | rub }}</span>
+    </div>
+    <div class="stat">
+        <span class="label">Доступно сегодня</span>
+        {% if today_state %}
+        <span class="value {% if today_state.end_balance < 0 %}bad{% elif today_state.end_balance > 0 %}ok{% endif %}">
+            {{ today_state.end_balance | rub }}
+        </span>
+        {% else %}
+        <span class="value">{{ settings.daily_budget | rub }}</span>
+        {% endif %}
+    </div>
+    <div class="stat">
+        <span class="label">Авто-остатки (прошлые дни)</span>
+        <span class="value ok">{{ auto_remainder_total | rub }}</span>
+    </div>
+    <div class="stat">
+        <span class="label">Засейвил (вручную)</span>
+        <span class="value ok">{{ total_saved | rub }}</span>
+    </div>
+</div>
+{% if today_state and today_state.carry_in %}
+<p id="carry-note" class="muted">С прошлого дня висит перерасход: −{{ today_state.carry_in | rub }}</p>
+{% else %}
+<p id="carry-note" class="muted" hidden></p>
+{% endif %}

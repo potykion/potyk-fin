@@ -1,0 +1,42 @@
+<form id="expense-form"
+      class="grid cols-2"
+      method="post"
+      action="{{ url_for('add_expense') }}"
+      hx-post="{{ url_for('add_expense') }}"
+      hx-target="#expense-form"
+      hx-swap="outerHTML">
+    {{ expense_form.hidden_tag() }}
+    <label>
+        {{ expense_form.amount.label.text }}
+        {{ expense_form.amount(min=1, step=1, required=true, autofocus=true) }}
+        {% for error in expense_form.amount.errors %}
+        <span class="field-error">{{ error }}</span>
+        {% endfor %}
+    </label>
+    <label>
+        {{ expense_form.date.label.text }}
+        {{ expense_form.date(required=true) }}
+        {% for error in expense_form.date.errors %}
+        <span class="field-error">{{ error }}</span>
+        {% endfor %}
+    </label>
+    <label>
+        {{ expense_form.category.label.text }}
+        {{ expense_form.category(list='categories', required=true, placeholder='еда, быт…') }}
+        <datalist id="categories">
+            {% for cat in categories %}
+            <option value="{{ cat }}"></option>
+            {% endfor %}
+        </datalist>
+        {% for error in expense_form.category.errors %}
+        <span class="field-error">{{ error }}</span>
+        {% endfor %}
+    </label>
+    <label>
+        {{ expense_form.description.label.text }}
+        {{ expense_form.description(placeholder='необязательно') }}
+    </label>
+    <div class="full">
+        {{ expense_form.submit() }}
+    </div>
+</form>

@@ -3,34 +3,9 @@
 {% block main %}
 <h1>Сегодня, {{ today.isoformat() }}</h1>
 
-<div class="summary">
-    <div class="stat">
-        <span class="label">Бюджет / день</span>
-        <span class="value">{{ settings.daily_budget | rub }}</span>
-    </div>
-    <div class="stat">
-        <span class="label">Доступно сегодня</span>
-        {% if today_state %}
-        <span class="value {% if today_state.end_balance < 0 %}bad{% elif today_state.end_balance > 0 %}ok{% endif %}">
-            {{ today_state.end_balance | rub }}
-        </span>
-        {% else %}
-        <span class="value">{{ settings.daily_budget | rub }}</span>
-        {% endif %}
-    </div>
-    <div class="stat">
-        <span class="label">Авто-остатки (прошлые дни)</span>
-        <span class="value ok">{{ auto_remainder_total | rub }}</span>
-    </div>
-    <div class="stat">
-        <span class="label">Засейвил (вручную)</span>
-        <span class="value ok">{{ total_saved | rub }}</span>
-    </div>
+<div id="summary-wrap">
+{% include "partials/_summary.html" %}
 </div>
-
-{% if today_state and today_state.carry_in %}
-<p class="muted">С прошлого дня висит перерасход: −{{ today_state.carry_in | rub }}</p>
-{% endif %}
 
 <div class="panel">
     <details data-panel="budget" {% if open_panel == 'budget' %}open{% endif %}>
@@ -51,33 +26,7 @@
 <div class="panel">
     <details data-panel="expense" {% if open_panel == 'expense' %}open{% endif %}>
         <summary>Добавить трату</summary>
-        <form class="grid cols-2" method="post" action="{{ url_for('add_expense') }}">
-            {{ expense_form.hidden_tag() }}
-            <label>
-                {{ expense_form.amount.label.text }}
-                {{ expense_form.amount(min=1, step=1, required=true) }}
-            </label>
-            <label>
-                {{ expense_form.date.label.text }}
-                {{ expense_form.date(required=true) }}
-            </label>
-            <label>
-                {{ expense_form.category.label.text }}
-                {{ expense_form.category(list='categories', required=true, placeholder='еда, быт…') }}
-                <datalist id="categories">
-                    {% for cat in categories %}
-                    <option value="{{ cat }}"></option>
-                    {% endfor %}
-                </datalist>
-            </label>
-            <label>
-                {{ expense_form.description.label.text }}
-                {{ expense_form.description(placeholder='необязательно') }}
-            </label>
-            <div class="full">
-                {{ expense_form.submit() }}
-            </div>
-        </form>
+        {% include "partials/_expense_form.html" %}
     </details>
 </div>
 
@@ -124,65 +73,7 @@
 </div>
 
 <h2>Лента</h2>
-
-{% if not days %}
-<p class="empty">Пока нет трат — добавь первую.</p>
-{% endif %}
-
-{% for day in days %}
-<section class="day">
-    <div class="day-head">
-        <span class="date">{{ day.date.isoformat() }}{% if day.date == today %} · сегодня{% endif %}</span>
-        <span class="meta">
-            старт {{ day.start_available | rub }}
-            {% if day.carry_in %}· долг вчера −{{ day.carry_in | rub }}{% endif %}
-        </span>
-        <span class="badges">
-            <span class="badge spent">потрачено {{ day.spent | rub }}</span>
-            {% if day.end_balance < 0 %}
-            <span class="badge bad">долг {{ day.carry_out | rub }}</span>
-            {% else %}
-            <span class="badge ok">остаток {{ day.eod_remainder | rub }}</span>
-            {% endif %}
-        </span>
-    </div>
-
-    {% if day.expenses %}
-    <table>
-        <thead>
-        <tr>
-            <th>Сумма</th>
-            <th>Категория</th>
-            <th>Описание</th>
-            <th class="num">Баланс</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for e in day.expenses %}
-        <tr>
-            <td>{{ e.amount | rub }}</td>
-            <td>{{ e.category }}</td>
-            <td class="muted">{{ e.description or '—' }}</td>
-            <td class="num balance {% if e.running_balance < 0 %}bad{% elif e.running_balance > 0 %}ok{% endif %}">
-                {{ e.running_balance | rub }}
-            </td>
-            <td>
-                <form class="inline-form" method="post" action="{{ url_for('delete_expense', expense_id=e.id) }}"
-                      onsubmit="return confirm('Удалить трату?')">
-                    {{ delete_form.hidden_tag() }}
-                    {{ delete_form.submit(class_='danger') }}
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p class="empty">Трат нет</p>
-    {% endif %}
-</section>
-{% endfor %}
+{% include "partials/_feed.html" %}
 
 <script>
 (() => {

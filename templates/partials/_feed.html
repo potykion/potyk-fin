@@ -1,0 +1,9 @@
+<div id="feed">
+{% if not days %}
+<p class="empty">Пока нет трат — добавь первую.</p>
+{% endif %}
+
+{% for day in days %}
+{% include "partials/_day.html" %}
+{% endfor %}
+</div>

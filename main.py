@@ -2,7 +2,7 @@ import os
 from datetime import date
 
 from dotenv import load_dotenv
-from flask import Flask, flash, redirect, render_template, url_for
+from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func, select
@@ -57,6 +57,10 @@ def flash_form_errors(form) -> None:
             flash(message, "error")
 
 
+def is_htmx() -> bool:
+    return request.headers.get("HX-Request") == "true"
+
+
 def create_app() -> Flask:
     app = Flask(__name__)
     app.secret_key = os.environ["FLASK_SECRET"]
@@ -75,13 +79,13 @@ def create_app() -> Flask:
     def rub_filter(value: int) -> str:
         return f"{value:,}".replace(",", " ")
 
-    def render_index(
+    def index_context(
         *,
         open_panel: str | None = None,
         expense_form: ExpenseForm | None = None,
         saving_form: SavingForm | None = None,
         budget_form: BudgetForm | None = None,
-    ):
+    ) -> dict:
         settings = get_settings()
         expenses = db.session.scalars(
             select(Expense).order_by(Expense.date, Expense.id)
@@ -107,22 +111,24 @@ def create_app() -> Flask:
         if budget_form is None:
             budget_form = BudgetForm(data={"daily_budget": settings.daily_budget})
 
-        return render_template(
-            "index.html",
-            settings=settings,
-            days=visible_days,
-            today=today,
-            today_state=today_state,
-            savings=savings,
-            total_saved=total_saved,
-            auto_remainder_total=auto_remainder_total,
-            categories=categories,
-            expense_form=expense_form or ExpenseForm(),
-            saving_form=saving_form or SavingForm(),
-            budget_form=budget_form,
-            delete_form=DeleteForm(),
-            open_panel=open_panel,
-        )
+        return {
+            "settings": settings,
+            "days": visible_days,
+            "today": today,
+            "today_state": today_state,
+            "savings": savings,
+            "total_saved": total_saved,
+            "auto_remainder_total": auto_remainder_total,
+            "categories": categories,
+            "expense_form": expense_form or ExpenseForm(),
+            "saving_form": saving_form or SavingForm(),
+            "budget_form": budget_form,
+            "delete_form": DeleteForm(),
+            "open_panel": open_panel,
+        }
+
+    def render_index(**kwargs):
+        return render_template("index.html", **index_context(**kwargs))
 
     @app.route("/")
     @login_required
@@ -134,18 +140,29 @@ def create_app() -> Flask:
     def add_expense():
         form = ExpenseForm()
         if not form.validate_on_submit():
+            if is_htmx():
+                ctx = index_context(open_panel="expense", expense_form=form)
+                return render_template("partials/_expense_form.html", **ctx)
             flash_form_errors(form)
             return render_index(open_panel="expense", expense_form=form), 400
 
-        db.session.add(
-            Expense(
-                date=form.date.data,
-                amount=form.amount.data,
-                category=form.category.data.strip(),
-                description=(form.description.data or "").strip(),
-            )
+        expense = Expense(
+            date=form.date.data,
+            amount=form.amount.data,
+            category=form.category.data.strip(),
+            description=(form.description.data or "").strip(),
         )
+        db.session.add(expense)
         db.session.commit()
+
+        if is_htmx():
+            fresh = ExpenseForm(
+                formdata=None,
+                date=expense.date,
+            )
+            ctx = index_context(expense_form=fresh)
+            return render_template("partials/_expense_added.html", **ctx)
+
         flash("Трата добавлена", "success")
         return redirect(url_for("index"))
 

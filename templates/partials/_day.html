@@ -1,0 +1,52 @@
+<section class="day" id="day-{{ day.date.isoformat() }}">
+    <div class="day-head">
+        <span class="date">{{ day.date.isoformat() }}{% if day.date == today %} · сегодня{% endif %}</span>
+        <span class="meta">
+            старт {{ day.start_available | rub }}
+            {% if day.carry_in %}· долг вчера −{{ day.carry_in | rub }}{% endif %}
+        </span>
+        <span class="badges">
+            <span class="badge spent">потрачено {{ day.spent | rub }}</span>
+            {% if day.end_balance < 0 %}
+            <span class="badge bad">долг {{ day.carry_out | rub }}</span>
+            {% else %}
+            <span class="badge ok">остаток {{ day.eod_remainder | rub }}</span>
+            {% endif %}
+        </span>
+    </div>
+
+    {% if day.expenses %}
+    <table>
+        <thead>
+        <tr>
+            <th>Сумма</th>
+            <th>Категория</th>
+            <th>Описание</th>
+            <th class="num">Баланс</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for e in day.expenses %}
+        <tr>
+            <td>{{ e.amount | rub }}</td>
+            <td>{{ e.category }}</td>
+            <td class="muted">{{ e.description or '—' }}</td>
+            <td class="num balance {% if e.running_balance < 0 %}bad{% elif e.running_balance > 0 %}ok{% endif %}">
+                {{ e.running_balance | rub }}
+            </td>
+            <td>
+                <form class="inline-form" method="post" action="{{ url_for('delete_expense', expense_id=e.id) }}"
+                      onsubmit="return confirm('Удалить трату?')">
+                    {{ delete_form.hidden_tag() }}
+                    {{ delete_form.submit(class_='danger') }}
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty">Трат нет</p>
+    {% endif %}
+</section>

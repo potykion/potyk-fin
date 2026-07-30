@@ -1,0 +1,12 @@
+{% include "partials/_expense_form.html" %}
+<div id="summary-wrap" hx-swap-oob="true">
+{% include "partials/_summary.html" %}
+</div>
+<div id="feed" hx-swap-oob="true">
+{% if not days %}
+<p class="empty">Пока нет трат — добавь первую.</p>
+{% endif %}
+{% for day in days %}
+{% include "partials/_day.html" %}
+{% endfor %}
+</div>
