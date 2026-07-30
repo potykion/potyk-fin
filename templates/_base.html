@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>$PROJECT</title>
+    <style>
+        body {
+            max-width: 700px;
+            margin: auto;
+            font-family: "Rubik", system-ui;
+        }
+    </style>
+
+    {% block style %}
+    {% endblock %}
+
+</head>
+
+
+<body>
+<header style="padding: 20px; display: flex; gap: 10px; ">
+    <a style="text-decoration: none;  " href="/">
+        /
+    </a>
+    <div style="flex-grow: 1"></div>
+
+    <a style="text-decoration: none;  " href="/form">
+        /form
+    </a>
+
+</header>
+<hr style="margin-top: 0; margin-bottom:0">
+
+<main>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+    {% block main %}
+    {% endblock %}
+</main>
+</body>
+</html>
