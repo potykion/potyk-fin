@@ -1,0 +1,19 @@
+[Unit]
+Description=spending tracking and savings
+After=network.target
+
+[Service]
+User=leybovich-nikita
+# e.g. $HOME = /home/leybovich-nikita
+# e.g. $PROJECT = /potyk-fin
+# e.g. $PORT = 5007
+WorkingDirectory=/home/leybovich-nikita/potyk-fin
+EnvironmentFile=/home/leybovich-nikita/potyk-fin/.env
+ExecStart=/home/leybovich-nikita/potyk-fin/.venv/bin/flask run --host=0.0.0.0 --port=5007
+Restart=always
+RestartSec=10
+StandardOutput=file:/home/leybovich-nikita/potyk-fin/logs/flask.log
+StandardError=file:/home/leybovich-nikita/potyk-fin/logs/flask.error.log
+
+[Install]
+WantedBy=multi-user.target
