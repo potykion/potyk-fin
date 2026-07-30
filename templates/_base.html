@@ -1,50 +1,315 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>potyk-fin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            max-width: 700px;
-            margin: auto;
-            font-family: "Rubik", system-ui;
+        :root {
+            --bg: #f6f4ef;
+            --ink: #1c1b19;
+            --muted: #6b6860;
+            --line: #ddd8ce;
+            --ok: #1f6b4a;
+            --ok-bg: #e5f3ec;
+            --bad: #9b2c2c;
+            --bad-bg: #f8e8e8;
+            --card: #fffdf8;
+            --accent: #2a5a8c;
         }
+
+        * { box-sizing: border-box; }
+
+        body {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 16px 48px;
+            font-family: "Rubik", system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(ellipse at top right, #ebe6da 0%, transparent 55%),
+                var(--bg);
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+
+        header {
+            padding: 20px 0;
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+        }
+
+        header .brand {
+            font-weight: 600;
+            font-size: 1.15rem;
+            color: var(--ink);
+        }
+
+        header .spacer { flex-grow: 1; }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--line);
+            margin: 0 0 20px;
+        }
+
+        .alert {
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .alert-success { background: var(--ok-bg); color: var(--ok); }
+        .alert-error { background: var(--bad-bg); color: var(--bad); }
+
+        h1, h2 {
+            font-weight: 600;
+            margin: 0 0 12px;
+        }
+
+        h1 { font-size: 1.35rem; }
+        h2 { font-size: 1.1rem; margin-top: 28px; }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        @media (min-width: 560px) {
+            .summary { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .stat {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .stat .label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .stat .value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat .value.ok { color: var(--ok); }
+        .stat .value.bad { color: var(--bad); }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 14px;
+        }
+
+        .panel details > summary {
+            cursor: pointer;
+            font-weight: 500;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .panel details > summary::-webkit-details-marker { display: none; }
+
+        .panel details > summary::before {
+            content: "›";
+            display: inline-block;
+            font-size: 1.25rem;
+            line-height: 1;
+            color: var(--muted);
+            transition: transform 0.15s ease;
+        }
+
+        .panel details[open] > summary::before {
+            transform: rotate(90deg);
+        }
+
+        form.grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        @media (min-width: 560px) {
+            form.grid.cols-2 { grid-template-columns: 1fr 1fr; }
+            form.grid.cols-2 .full { grid-column: 1 / -1; }
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        input, button, select {
+            font: inherit;
+            color: var(--ink);
+        }
+
+        input {
+            padding: 8px 10px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        button, .btn {
+            padding: 8px 12px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background: var(--ink);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        button.secondary, .btn.secondary {
+            background: transparent;
+            color: var(--ink);
+        }
+
+        button.danger {
+            background: transparent;
+            border-color: var(--line);
+            color: var(--muted);
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+
+        button.danger:hover { color: var(--bad); border-color: var(--bad); }
+
+        .inline-form { display: inline; }
+
+        .day {
+            margin-top: 18px;
+            border-top: 1px solid var(--line);
+            padding-top: 14px;
+        }
+
+        .day-head {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .day-head .date {
+            font-weight: 600;
+        }
+
+        .day-head .meta {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .day-head .remainder {
+            margin-left: auto;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .day-head .remainder.ok {
+            background: var(--ok-bg);
+            color: var(--ok);
+        }
+
+        .day-head .remainder.bad {
+            background: var(--bad-bg);
+            color: var(--bad);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 6px 4px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+        }
+
+        th {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        td.num, th.num { text-align: right; }
+
+        td.balance.ok { color: var(--ok); }
+        td.balance.bad { color: var(--bad); }
+
+        .muted { color: var(--muted); }
+        .empty { color: var(--muted); font-size: 0.95rem; padding: 8px 0; }
+
+        .savings-list {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0;
+        }
+
+        .savings-list li {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--line);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .savings-list .amt { font-weight: 500; min-width: 5rem; }
+        .savings-list .note { flex: 1; color: var(--muted); font-size: 0.9rem; }
     </style>
-
-    {% block style %}
-    {% endblock %}
-
 </head>
-
-
 <body>
-<header style="padding: 20px; display: flex; gap: 10px; ">
-    <a style="text-decoration: none;  " href="/">
-        /
+<header>
+    <a class="brand" href="/">potyk-fin</a>
+    <div class="spacer"></div>
+    <a href="https://www.tbank.ru/mybank/operations/" target="_blank" rel="noopener noreferrer">
+        где смотреть траты
     </a>
-    <div style="flex-grow: 1"></div>
-
-    <a style="text-decoration: none;  " href="/form">
-        /form
-    </a>
-
 </header>
-<hr style="margin-top: 0; margin-bottom:0">
+<hr>
 
 <main>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">{{ message }}</div>
+    <div class="alert alert-{{ category }}">{{ message }}</div>
     {% endfor %}
   {% endif %}
 {% endwith %}
 
-
-    {% block main %}
-    {% endblock %}
+{% block main %}{% endblock %}
 </main>
 </body>
 </html>

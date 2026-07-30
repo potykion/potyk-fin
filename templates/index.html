@@ -1,10 +1,180 @@
 {% extends '_base.html' %}
 
-{% block style %}
-{% endblock %}
-
 {% block main %}
-<h1>INDEX</h1>
+<h1>Сегодня, {{ today.isoformat() }}</h1>
 
+<div class="summary">
+    <div class="stat">
+        <span class="label">Бюджет / день</span>
+        <span class="value">{{ settings.daily_budget | rub }}</span>
+    </div>
+    <div class="stat">
+        <span class="label">Доступно сегодня</span>
+        {% if today_state %}
+        <span class="value {% if today_state.end_balance < 0 %}bad{% elif today_state.end_balance > 0 %}ok{% endif %}">
+            {{ today_state.end_balance | rub }}
+        </span>
+        {% else %}
+        <span class="value">{{ settings.daily_budget | rub }}</span>
+        {% endif %}
+    </div>
+    <div class="stat">
+        <span class="label">Авто-остатки (прошлые дни)</span>
+        <span class="value ok">{{ auto_remainder_total | rub }}</span>
+    </div>
+    <div class="stat">
+        <span class="label">Засейвил (вручную)</span>
+        <span class="value ok">{{ total_saved | rub }}</span>
+    </div>
+</div>
 
+{% if today_state and today_state.carry_in %}
+<p class="muted">С прошлого дня висит перерасход: −{{ today_state.carry_in | rub }}</p>
+{% endif %}
+
+<div class="panel">
+    <details>
+        <summary>Изменить бюджет на день</summary>
+        <form class="grid cols-2" method="post" action="{{ url_for('update_budget') }}">
+            <label class="full">
+                Новый бюджет (₽)
+                <input type="number" name="daily_budget" min="1" step="1" required
+                       value="{{ settings.daily_budget }}">
+            </label>
+            <div class="full">
+                <button type="submit">Сохранить</button>
+            </div>
+        </form>
+    </details>
+</div>
+
+<div class="panel">
+    <details>
+        <summary>Добавить трату</summary>
+        <form class="grid cols-2" method="post" action="{{ url_for('add_expense') }}">
+            <label>
+                Сумма
+                <input type="number" name="amount" min="1" step="1" required>
+            </label>
+            <label>
+                Дата
+                <input type="date" name="date" value="{{ today.isoformat() }}" required>
+            </label>
+            <label>
+                Категория
+                <input type="text" name="category" list="categories" required placeholder="еда, быт…">
+                <datalist id="categories">
+                    {% for cat in categories %}
+                    <option value="{{ cat }}"></option>
+                    {% endfor %}
+                </datalist>
+            </label>
+            <label>
+                Описание
+                <input type="text" name="description" placeholder="необязательно">
+            </label>
+            <div class="full">
+                <button type="submit">Добавить трату</button>
+            </div>
+        </form>
+    </details>
+</div>
+
+<div class="panel">
+    <details>
+        <summary>Зафиксировать сейв</summary>
+        <p class="muted">Когда реально перевёл на накопительный в банке</p>
+        <form class="grid cols-2" method="post" action="{{ url_for('add_saving') }}">
+            <label>
+                Сумма
+                <input type="number" name="amount" min="1" step="1" required>
+            </label>
+            <label>
+                Дата
+                <input type="date" name="date" value="{{ today.isoformat() }}" required>
+            </label>
+            <label class="full">
+                Заметка
+                <input type="text" name="note" placeholder="накопительный счёт">
+            </label>
+            <div class="full">
+                <button type="submit">Зафиксировать</button>
+            </div>
+        </form>
+
+        {% if savings %}
+        <ul class="savings-list">
+            {% for s in savings %}
+            <li>
+                <span class="muted">{{ s.date.isoformat() }}</span>
+                <span class="amt">{{ s.amount | rub }}</span>
+                <span class="note">{{ s.note or '—' }}</span>
+                <form class="inline-form" method="post" action="{{ url_for('delete_saving', saving_id=s.id) }}"
+                      onsubmit="return confirm('Удалить сейв?')">
+                    <button class="danger" type="submit">✕</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </details>
+</div>
+
+<h2>Лента</h2>
+
+{% if not days %}
+<p class="empty">Пока нет трат — добавь первую.</p>
+{% endif %}
+
+{% for day in days %}
+<section class="day">
+    <div class="day-head">
+        <span class="date">{{ day.date.isoformat() }}{% if day.date == today %} · сегодня{% endif %}</span>
+        <span class="meta">
+            старт {{ day.start_available | rub }}
+            · потрачено {{ day.spent | rub }}
+            {% if day.carry_in %}· долг −{{ day.carry_in | rub }}{% endif %}
+        </span>
+        {% if day.end_balance < 0 %}
+        <span class="remainder bad">долг {{ day.carry_out | rub }}</span>
+        {% else %}
+        <span class="remainder ok">остаток {{ day.eod_remainder | rub }}</span>
+        {% endif %}
+    </div>
+
+    {% if day.expenses %}
+    <table>
+        <thead>
+        <tr>
+            <th>Сумма</th>
+            <th>Категория</th>
+            <th>Описание</th>
+            <th class="num">Баланс</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for e in day.expenses %}
+        <tr>
+            <td>{{ e.amount | rub }}</td>
+            <td>{{ e.category }}</td>
+            <td class="muted">{{ e.description or '—' }}</td>
+            <td class="num balance {% if e.running_balance < 0 %}bad{% elif e.running_balance > 0 %}ok{% endif %}">
+                {{ e.running_balance | rub }}
+            </td>
+            <td>
+                <form class="inline-form" method="post" action="{{ url_for('delete_expense', expense_id=e.id) }}"
+                      onsubmit="return confirm('Удалить трату?')">
+                    <button class="danger" type="submit">✕</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty">Трат нет</p>
+    {% endif %}
+</section>
+{% endfor %}
 {% endblock %}
