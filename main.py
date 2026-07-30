@@ -60,6 +60,7 @@ def flash_form_errors(form) -> None:
 def create_app() -> Flask:
     app = Flask(__name__)
     app.secret_key = os.environ["FLASK_SECRET"]
+    app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "").lower() in {"1", "true", "yes"}
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///main.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

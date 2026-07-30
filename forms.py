@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 import os
 
 from flask_wtf import FlaskForm
@@ -22,12 +22,16 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Войти")
 
 
+def _yesterday() -> date:
+    return date.today() - timedelta(days=1)
+
+
 class ExpenseForm(FlaskForm):
     amount = IntegerField(
         "Сумма",
         validators=[InputRequired(), NumberRange(min=1, message="Укажи положительную сумму")],
     )
-    date = DateField("Дата", validators=[DataRequired()], default=date.today)
+    date = DateField("Дата", validators=[DataRequired()], default=_yesterday)
     category = StringField(
         "Категория",
         validators=[DataRequired(message="Укажи категорию"), Length(max=64)],

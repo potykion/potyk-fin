@@ -33,7 +33,7 @@
 {% endif %}
 
 <div class="panel">
-    <details {% if open_panel == 'budget' %}open{% endif %}>
+    <details data-panel="budget" {% if open_panel == 'budget' %}open{% endif %}>
         <summary>Изменить бюджет на день</summary>
         <form class="grid cols-2" method="post" action="{{ url_for('update_budget') }}">
             {{ budget_form.hidden_tag() }}
@@ -49,7 +49,7 @@
 </div>
 
 <div class="panel">
-    <details {% if open_panel == 'expense' %}open{% endif %}>
+    <details data-panel="expense" {% if open_panel == 'expense' %}open{% endif %}>
         <summary>Добавить трату</summary>
         <form class="grid cols-2" method="post" action="{{ url_for('add_expense') }}">
             {{ expense_form.hidden_tag() }}
@@ -82,7 +82,7 @@
 </div>
 
 <div class="panel">
-    <details {% if open_panel == 'saving' %}open{% endif %}>
+    <details data-panel="saving" {% if open_panel == 'saving' %}open{% endif %}>
         <summary>Зафиксировать сейв</summary>
         <p class="muted">Когда реально перевёл на накопительный в банке</p>
         <form class="grid cols-2" method="post" action="{{ url_for('add_saving') }}">
@@ -135,14 +135,16 @@
         <span class="date">{{ day.date.isoformat() }}{% if day.date == today %} · сегодня{% endif %}</span>
         <span class="meta">
             старт {{ day.start_available | rub }}
-            · потрачено {{ day.spent | rub }}
-            {% if day.carry_in %}· долг −{{ day.carry_in | rub }}{% endif %}
+            {% if day.carry_in %}· долг вчера −{{ day.carry_in | rub }}{% endif %}
         </span>
-        {% if day.end_balance < 0 %}
-        <span class="remainder bad">долг {{ day.carry_out | rub }}</span>
-        {% else %}
-        <span class="remainder ok">остаток {{ day.eod_remainder | rub }}</span>
-        {% endif %}
+        <span class="badges">
+            <span class="badge spent">потрачено {{ day.spent | rub }}</span>
+            {% if day.end_balance < 0 %}
+            <span class="badge bad">долг {{ day.carry_out | rub }}</span>
+            {% else %}
+            <span class="badge ok">остаток {{ day.eod_remainder | rub }}</span>
+            {% endif %}
+        </span>
     </div>
 
     {% if day.expenses %}
@@ -181,4 +183,31 @@
     {% endif %}
 </section>
 {% endfor %}
+
+<script>
+(() => {
+  const key = "potyk-fin:panels";
+  const load = () => {
+    try { return JSON.parse(localStorage.getItem(key) || "{}"); }
+    catch { return {}; }
+  };
+  const save = (state) => localStorage.setItem(key, JSON.stringify(state));
+
+  document.querySelectorAll("details[data-panel]").forEach((el) => {
+    const id = el.dataset.panel;
+    const state = load();
+    if (el.open) {
+      state[id] = true;
+      save(state);
+    } else if (state[id]) {
+      el.open = true;
+    }
+    el.addEventListener("toggle", () => {
+      const next = load();
+      next[id] = el.open;
+      save(next);
+    });
+  });
+})();
+</script>
 {% endblock %}

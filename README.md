@@ -1,6 +1,7 @@
 # potyk-fin
 
 > spending tracking and savings
+> ex https://docs.google.com/spreadsheets/d/1-gP3FTcAp4yAFnzMWaLnpEPn7C054V8KdYHYCBFOJwU/edit?usp=sharing
 
 ## Links
 
@@ -39,5 +40,9 @@ sudo systemctl enable --now potyk-fin.service
 ssh -l leybovich-nikita 84.201.131.244
 cd potyk-fin
 git pull
+
+source ./.venv/bin/activate
+pip install -r requirements.txt 
+
 sudo systemctl restart potyk-fin.service
 ```

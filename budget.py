@@ -78,6 +78,8 @@ def compute_days(
                 )
             )
 
+        rows.reverse()
+
         eod_remainder = max(0, balance)
         carry_out = max(0, -balance)
         days.append(
