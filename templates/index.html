@@ -33,36 +33,37 @@
 {% endif %}
 
 <div class="panel">
-    <details>
+    <details {% if open_panel == 'budget' %}open{% endif %}>
         <summary>Изменить бюджет на день</summary>
         <form class="grid cols-2" method="post" action="{{ url_for('update_budget') }}">
+            {{ budget_form.hidden_tag() }}
             <label class="full">
-                Новый бюджет (₽)
-                <input type="number" name="daily_budget" min="1" step="1" required
-                       value="{{ settings.daily_budget }}">
+                {{ budget_form.daily_budget.label.text }}
+                {{ budget_form.daily_budget(min=1, step=1, required=true) }}
             </label>
             <div class="full">
-                <button type="submit">Сохранить</button>
+                {{ budget_form.submit() }}
             </div>
         </form>
     </details>
 </div>
 
 <div class="panel">
-    <details>
+    <details {% if open_panel == 'expense' %}open{% endif %}>
         <summary>Добавить трату</summary>
         <form class="grid cols-2" method="post" action="{{ url_for('add_expense') }}">
+            {{ expense_form.hidden_tag() }}
             <label>
-                Сумма
-                <input type="number" name="amount" min="1" step="1" required>
+                {{ expense_form.amount.label.text }}
+                {{ expense_form.amount(min=1, step=1, required=true) }}
             </label>
             <label>
-                Дата
-                <input type="date" name="date" value="{{ today.isoformat() }}" required>
+                {{ expense_form.date.label.text }}
+                {{ expense_form.date(required=true) }}
             </label>
             <label>
-                Категория
-                <input type="text" name="category" list="categories" required placeholder="еда, быт…">
+                {{ expense_form.category.label.text }}
+                {{ expense_form.category(list='categories', required=true, placeholder='еда, быт…') }}
                 <datalist id="categories">
                     {% for cat in categories %}
                     <option value="{{ cat }}"></option>
@@ -70,35 +71,36 @@
                 </datalist>
             </label>
             <label>
-                Описание
-                <input type="text" name="description" placeholder="необязательно">
+                {{ expense_form.description.label.text }}
+                {{ expense_form.description(placeholder='необязательно') }}
             </label>
             <div class="full">
-                <button type="submit">Добавить трату</button>
+                {{ expense_form.submit() }}
             </div>
         </form>
     </details>
 </div>
 
 <div class="panel">
-    <details>
+    <details {% if open_panel == 'saving' %}open{% endif %}>
         <summary>Зафиксировать сейв</summary>
         <p class="muted">Когда реально перевёл на накопительный в банке</p>
         <form class="grid cols-2" method="post" action="{{ url_for('add_saving') }}">
+            {{ saving_form.hidden_tag() }}
             <label>
-                Сумма
-                <input type="number" name="amount" min="1" step="1" required>
+                {{ saving_form.amount.label.text }}
+                {{ saving_form.amount(min=1, step=1, required=true) }}
             </label>
             <label>
-                Дата
-                <input type="date" name="date" value="{{ today.isoformat() }}" required>
+                {{ saving_form.date.label.text }}
+                {{ saving_form.date(required=true) }}
             </label>
             <label class="full">
-                Заметка
-                <input type="text" name="note" placeholder="накопительный счёт">
+                {{ saving_form.note.label.text }}
+                {{ saving_form.note(placeholder='накопительный счёт') }}
             </label>
             <div class="full">
-                <button type="submit">Зафиксировать</button>
+                {{ saving_form.submit() }}
             </div>
         </form>
 
@@ -111,7 +113,8 @@
                 <span class="note">{{ s.note or '—' }}</span>
                 <form class="inline-form" method="post" action="{{ url_for('delete_saving', saving_id=s.id) }}"
                       onsubmit="return confirm('Удалить сейв?')">
-                    <button class="danger" type="submit">✕</button>
+                    {{ delete_form.hidden_tag() }}
+                    {{ delete_form.submit(class_='danger') }}
                 </form>
             </li>
             {% endfor %}
@@ -165,7 +168,8 @@
             <td>
                 <form class="inline-form" method="post" action="{{ url_for('delete_expense', expense_id=e.id) }}"
                       onsubmit="return confirm('Удалить трату?')">
-                    <button class="danger" type="submit">✕</button>
+                    {{ delete_form.hidden_tag() }}
+                    {{ delete_form.submit(class_='danger') }}
                 </form>
             </td>
         </tr>

@@ -2,11 +2,12 @@ import os
 from datetime import date
 
 from dotenv import load_dotenv
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, redirect, render_template, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func, select
 
 from budget import compute_days
+from forms import BudgetForm, DeleteForm, ExpenseForm, SavingForm
 
 load_dotenv()
 
@@ -48,27 +49,10 @@ def get_settings() -> Settings:
     return settings
 
 
-def parse_amount(raw: str) -> int | None:
-    raw = (raw or "").strip().replace(" ", "").replace(",", "")
-    if not raw:
-        return None
-    try:
-        value = int(raw)
-    except ValueError:
-        return None
-    if value <= 0:
-        return None
-    return value
-
-
-def parse_date(raw: str) -> date | None:
-    raw = (raw or "").strip()
-    if not raw:
-        return None
-    try:
-        return date.fromisoformat(raw)
-    except ValueError:
-        return None
+def flash_form_errors(form) -> None:
+    for messages in form.errors.values():
+        for message in messages:
+            flash(message, "error")
 
 
 def create_app() -> Flask:
@@ -87,8 +71,13 @@ def create_app() -> Flask:
     def rub_filter(value: int) -> str:
         return f"{value:,}".replace(",", " ")
 
-    @app.route("/")
-    def index():
+    def render_index(
+        *,
+        open_panel: str | None = None,
+        expense_form: ExpenseForm | None = None,
+        saving_form: SavingForm | None = None,
+        budget_form: BudgetForm | None = None,
+    ):
         settings = get_settings()
         expenses = db.session.scalars(
             select(Expense).order_by(Expense.date, Expense.id)
@@ -111,6 +100,9 @@ def create_app() -> Flask:
             d for d in days_desc if d.expenses or d.date == today or d.carry_in or d.carry_out
         ]
 
+        if budget_form is None:
+            budget_form = BudgetForm(data={"daily_budget": settings.daily_budget})
+
         return render_template(
             "index.html",
             settings=settings,
@@ -121,28 +113,30 @@ def create_app() -> Flask:
             total_saved=total_saved,
             auto_remainder_total=auto_remainder_total,
             categories=categories,
+            expense_form=expense_form or ExpenseForm(),
+            saving_form=saving_form or SavingForm(),
+            budget_form=budget_form,
+            delete_form=DeleteForm(),
+            open_panel=open_panel,
         )
+
+    @app.route("/")
+    def index():
+        return render_index()
 
     @app.post("/expenses")
     def add_expense():
-        amount = parse_amount(request.form.get("amount", ""))
-        category = (request.form.get("category") or "").strip()
-        description = (request.form.get("description") or "").strip()
-        expense_date = parse_date(request.form.get("date", "")) or date.today()
-
-        if amount is None:
-            flash("Укажи положительную сумму", "error")
-            return redirect(url_for("index"))
-        if not category:
-            flash("Укажи категорию", "error")
-            return redirect(url_for("index"))
+        form = ExpenseForm()
+        if not form.validate_on_submit():
+            flash_form_errors(form)
+            return render_index(open_panel="expense", expense_form=form), 400
 
         db.session.add(
             Expense(
-                date=expense_date,
-                amount=amount,
-                category=category,
-                description=description,
+                date=form.date.data,
+                amount=form.amount.data,
+                category=form.category.data.strip(),
+                description=(form.description.data or "").strip(),
             )
         )
         db.session.commit()
@@ -151,6 +145,11 @@ def create_app() -> Flask:
 
     @app.post("/expenses/<int:expense_id>/delete")
     def delete_expense(expense_id: int):
+        form = DeleteForm()
+        if not form.validate_on_submit():
+            flash_form_errors(form)
+            return redirect(url_for("index"))
+
         expense = db.session.get(Expense, expense_id)
         if expense is None:
             flash("Трата не найдена", "error")
@@ -162,21 +161,29 @@ def create_app() -> Flask:
 
     @app.post("/savings")
     def add_saving():
-        amount = parse_amount(request.form.get("amount", ""))
-        note = (request.form.get("note") or "").strip()
-        saving_date = parse_date(request.form.get("date", "")) or date.today()
+        form = SavingForm()
+        if not form.validate_on_submit():
+            flash_form_errors(form)
+            return render_index(open_panel="saving", saving_form=form), 400
 
-        if amount is None:
-            flash("Укажи положительную сумму", "error")
-            return redirect(url_for("index"))
-
-        db.session.add(Saving(date=saving_date, amount=amount, note=note))
+        db.session.add(
+            Saving(
+                date=form.date.data,
+                amount=form.amount.data,
+                note=(form.note.data or "").strip(),
+            )
+        )
         db.session.commit()
         flash("Сейв зафиксирован", "success")
         return redirect(url_for("index"))
 
     @app.post("/savings/<int:saving_id>/delete")
     def delete_saving(saving_id: int):
+        form = DeleteForm()
+        if not form.validate_on_submit():
+            flash_form_errors(form)
+            return redirect(url_for("index"))
+
         saving = db.session.get(Saving, saving_id)
         if saving is None:
             flash("Сейв не найден", "error")
@@ -188,13 +195,13 @@ def create_app() -> Flask:
 
     @app.post("/settings/budget")
     def update_budget():
-        amount = parse_amount(request.form.get("daily_budget", ""))
-        if amount is None:
-            flash("Укажи положительный бюджет", "error")
-            return redirect(url_for("index"))
+        form = BudgetForm()
+        if not form.validate_on_submit():
+            flash_form_errors(form)
+            return render_index(open_panel="budget", budget_form=form), 400
 
         settings = get_settings()
-        settings.daily_budget = amount
+        settings.daily_budget = form.daily_budget.data
         db.session.commit()
         flash("Бюджет на день обновлён", "success")
         return redirect(url_for("index"))
