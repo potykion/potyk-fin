@@ -294,9 +294,12 @@
 <header>
     <a class="brand" href="/">potyk-fin</a>
     <div class="spacer"></div>
+    {% if current_user.is_authenticated %}
     <a href="https://www.tbank.ru/mybank/operations/" target="_blank" rel="noopener noreferrer">
         где смотреть траты
     </a>
+    <a href="{{ url_for('logout') }}">выйти</a>
+    {% endif %}
 </header>
 <hr>
 

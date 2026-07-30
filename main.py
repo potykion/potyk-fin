@@ -3,13 +3,15 @@ from datetime import date
 
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, url_for
+from flask_login import login_required
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func, select
 
+load_dotenv()
+
+from auth import setup_login
 from budget import compute_days
 from forms import BudgetForm, DeleteForm, ExpenseForm, SavingForm
-
-load_dotenv()
 
 db = SQLAlchemy()
 
@@ -62,6 +64,7 @@ def create_app() -> Flask:
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
+    setup_login(app)
 
     with app.app_context():
         db.create_all()
@@ -121,10 +124,12 @@ def create_app() -> Flask:
         )
 
     @app.route("/")
+    @login_required
     def index():
         return render_index()
 
     @app.post("/expenses")
+    @login_required
     def add_expense():
         form = ExpenseForm()
         if not form.validate_on_submit():
@@ -144,6 +149,7 @@ def create_app() -> Flask:
         return redirect(url_for("index"))
 
     @app.post("/expenses/<int:expense_id>/delete")
+    @login_required
     def delete_expense(expense_id: int):
         form = DeleteForm()
         if not form.validate_on_submit():
@@ -160,6 +166,7 @@ def create_app() -> Flask:
         return redirect(url_for("index"))
 
     @app.post("/savings")
+    @login_required
     def add_saving():
         form = SavingForm()
         if not form.validate_on_submit():
@@ -178,6 +185,7 @@ def create_app() -> Flask:
         return redirect(url_for("index"))
 
     @app.post("/savings/<int:saving_id>/delete")
+    @login_required
     def delete_saving(saving_id: int):
         form = DeleteForm()
         if not form.validate_on_submit():
@@ -194,6 +202,7 @@ def create_app() -> Flask:
         return redirect(url_for("index"))
 
     @app.post("/settings/budget")
+    @login_required
     def update_budget():
         form = BudgetForm()
         if not form.validate_on_submit():

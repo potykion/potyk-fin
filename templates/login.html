@@ -1,0 +1,15 @@
+{% extends '_base.html' %}
+
+{% block main %}
+<h1>Вход</h1>
+<form class="grid" method="post" action="{{ url_for('login') }}" style="max-width: 320px;">
+    {{ form.hidden_tag() }}
+    <label>
+        {{ form.secret.label.text }}
+        {{ form.secret(type='password') }}
+    </label>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}

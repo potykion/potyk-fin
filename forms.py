@@ -1,8 +1,25 @@
 from datetime import date
+import os
 
 from flask_wtf import FlaskForm
 from wtforms import DateField, IntegerField, StringField, SubmitField
-from wtforms.validators import DataRequired, InputRequired, Length, NumberRange, Optional
+from wtforms.validators import AnyOf, DataRequired, InputRequired, Length, NumberRange, Optional
+
+
+class LoginForm(FlaskForm):
+    secret = StringField(
+        "Секрет",
+        validators=[
+            DataRequired(),
+            AnyOf([os.environ["FLASK_SECRET"]], message="неверный секрет"),
+        ],
+        render_kw={
+            "required": True,
+            "placeholder": "секрет",
+            "autocomplete": "current-password",
+        },
+    )
+    submit = SubmitField("Войти")
 
 
 class ExpenseForm(FlaskForm):
