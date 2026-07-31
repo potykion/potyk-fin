@@ -97,7 +97,17 @@ def create_app() -> Flask:
             select(Expense.category).distinct().order_by(Expense.category)
         ).all()
 
-        days = compute_days(expenses, settings.daily_budget)
+        days = compute_days(
+            expenses,
+            settings.daily_budget,
+            extra_dates=[s.date for s in savings],
+        )
+        saved_by_date: dict[date, int] = {}
+        for s in savings:
+            saved_by_date[s.date] = saved_by_date.get(s.date, 0) + s.amount
+        for d in days:
+            d.saved = saved_by_date.get(d.date, 0)
+
         days_desc = list(reversed(days))
         today = date.today()
         today_state = next((d for d in days if d.date == today), None)
@@ -105,7 +115,9 @@ def create_app() -> Flask:
         auto_remainder_total = sum(d.eod_remainder for d in days if d.date < today)
 
         visible_days = [
-            d for d in days_desc if d.expenses or d.date == today or d.carry_in or d.carry_out
+            d
+            for d in days_desc
+            if d.expenses or d.date == today or d.carry_in or d.carry_out or d.saved
         ]
 
         if budget_form is None:

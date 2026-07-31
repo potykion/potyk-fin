@@ -296,9 +296,26 @@
             color: var(--ok);
         }
 
+        .day-head .badge.ok[data-amount] {
+            cursor: pointer;
+            border: none;
+            font: inherit;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .day-head .badge.ok[data-amount]:hover {
+            filter: brightness(0.97);
+        }
+
         .day-head .badge.bad {
             background: var(--bad-bg);
             color: var(--bad);
+        }
+
+        .day-head .badge.saved {
+            background: #e8eef5;
+            color: #2a4a6b;
         }
         table {
             width: 100%;
@@ -356,7 +373,6 @@
     <a href="https://www.tbank.ru/mybank/operations/" target="_blank" rel="noopener noreferrer">
         где смотреть траты
     </a>
-    <a href="{{ url_for('logout') }}">выйти</a>
     {% endif %}
 </header>
 <hr>

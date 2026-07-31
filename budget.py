@@ -26,6 +26,7 @@ class DayState:
     end_balance: int = 0
     eod_remainder: int = 0
     carry_out: int = 0
+    saved: int = 0
 
 
 def compute_days(
@@ -33,10 +34,18 @@ def compute_days(
     daily_budget: int,
     *,
     today: date | None = None,
+    extra_dates: Sequence[date] | None = None,
 ) -> list[DayState]:
     """Compute daily balances with overspend carry to the next calendar day."""
     today = today or date.today()
-    if not expenses:
+    by_date: dict[date, list] = {}
+    for expense in expenses:
+        by_date.setdefault(expense.date, []).append(expense)
+
+    anchors = set(by_date)
+    if extra_dates:
+        anchors.update(extra_dates)
+    if not anchors:
         return [
             DayState(
                 date=today,
@@ -48,12 +57,8 @@ def compute_days(
             )
         ]
 
-    by_date: dict[date, list] = {}
-    for expense in expenses:
-        by_date.setdefault(expense.date, []).append(expense)
-
-    start = min(by_date)
-    end = max(today, max(by_date))
+    start = min(anchors)
+    end = max(today, max(anchors))
 
     days: list[DayState] = []
     carry = 0

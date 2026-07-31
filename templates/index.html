@@ -99,6 +99,21 @@
       save(next);
     });
   });
+
+  document.querySelectorAll(".badge.ok[data-amount]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const panel = document.querySelector('details[data-panel="saving"]');
+      if (!panel) return;
+      panel.open = true;
+      const form = panel.querySelector("form");
+      if (!form) return;
+      const amount = form.querySelector('[name="amount"]');
+      const date = form.querySelector('[name="date"]');
+      if (amount) amount.value = el.dataset.amount;
+      if (date) date.value = el.dataset.date;
+      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  });
 })();
 </script>
 {% endblock %}
