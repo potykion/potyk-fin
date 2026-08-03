@@ -101,7 +101,7 @@
   });
 
   document.addEventListener("click", (e) => {
-    const saveBtn = e.target.closest(".badge.ok[data-amount]");
+    const saveBtn = e.target.closest(".add-saving-day");
     if (saveBtn) {
       const panel = document.querySelector('details[data-panel="saving"]');
       if (!panel) return;
@@ -113,6 +113,7 @@
       if (amount) amount.value = saveBtn.dataset.amount;
       if (date) date.value = saveBtn.dataset.date;
       panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (amount) amount.focus();
       return;
     }
 

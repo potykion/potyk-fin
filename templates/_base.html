@@ -291,7 +291,8 @@
             color: var(--ink);
         }
 
-        .day-head .add-expense-day {
+        .day-head .add-expense-day,
+        .day-head .add-saving-day {
             cursor: pointer;
             border: 1px solid var(--line);
             background: transparent;
@@ -303,7 +304,8 @@
             border-radius: 4px;
         }
 
-        .day-head .add-expense-day:hover {
+        .day-head .add-expense-day:hover,
+        .day-head .add-saving-day:hover {
             color: var(--ink);
             border-color: var(--ink);
         }
@@ -311,18 +313,6 @@
         .day-head .badge.ok {
             background: var(--ok-bg);
             color: var(--ok);
-        }
-
-        .day-head .badge.ok[data-amount] {
-            cursor: pointer;
-            border: none;
-            font: inherit;
-            font-weight: 600;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .day-head .badge.ok[data-amount]:hover {
-            filter: brightness(0.97);
         }
 
         .day-head .badge.bad {

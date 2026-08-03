@@ -13,12 +13,11 @@
             {% if day.end_balance < 0 %}
             <span class="badge bad">долг {{ day.carry_out | rub }}</span>
             {% else %}
-            <button type="button" class="badge ok"
+            <span class="badge ok">остаток {{ day.eod_remainder | rub }}</span>
+            <button type="button" class="add-saving-day"
                     data-amount="{{ day.eod_remainder }}"
                     data-date="{{ day.date.isoformat() }}"
-                    title="Заполнить в «Зафиксировать сейв»">
-                остаток {{ day.eod_remainder | rub }}
-            </button>
+                    title="Зафиксировать сейв на этот день">+</button>
             {% endif %}
             {% if day.saved %}
             <span class="badge saved">сейв {{ day.saved | rub }}</span>
