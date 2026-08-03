@@ -100,8 +100,9 @@
     });
   });
 
-  document.querySelectorAll(".badge.ok[data-amount]").forEach((el) => {
-    el.addEventListener("click", () => {
+  document.addEventListener("click", (e) => {
+    const saveBtn = e.target.closest(".badge.ok[data-amount]");
+    if (saveBtn) {
       const panel = document.querySelector('details[data-panel="saving"]');
       if (!panel) return;
       panel.open = true;
@@ -109,10 +110,24 @@
       if (!form) return;
       const amount = form.querySelector('[name="amount"]');
       const date = form.querySelector('[name="date"]');
-      if (amount) amount.value = el.dataset.amount;
-      if (date) date.value = el.dataset.date;
+      if (amount) amount.value = saveBtn.dataset.amount;
+      if (date) date.value = saveBtn.dataset.date;
       panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
+      return;
+    }
+
+    const addBtn = e.target.closest(".add-expense-day");
+    if (!addBtn) return;
+    const panel = document.querySelector('details[data-panel="expense"]');
+    if (!panel) return;
+    panel.open = true;
+    const form = panel.querySelector("form");
+    if (!form) return;
+    const date = form.querySelector('[name="date"]');
+    if (date) date.value = addBtn.dataset.date;
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const amount = form.querySelector('[name="amount"]');
+    if (amount) amount.focus();
   });
 })();
 </script>

@@ -7,6 +7,9 @@
         </span>
         <span class="badges">
             <span class="badge spent">потрачено {{ day.spent | rub }}</span>
+            <button type="button" class="add-expense-day"
+                    data-date="{{ day.date.isoformat() }}"
+                    title="Добавить трату на этот день">+</button>
             {% if day.end_balance < 0 %}
             <span class="badge bad">долг {{ day.carry_out | rub }}</span>
             {% else %}
