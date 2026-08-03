@@ -114,18 +114,12 @@ def create_app() -> Flask:
         total_saved = db.session.scalar(select(func.coalesce(func.sum(Saving.amount), 0))) or 0
         auto_remainder_total = sum(d.eod_remainder for d in days if d.date < today)
 
-        visible_days = [
-            d
-            for d in days_desc
-            if d.expenses or d.date == today or d.carry_in or d.carry_out or d.saved
-        ]
-
         if budget_form is None:
             budget_form = BudgetForm(data={"daily_budget": settings.daily_budget})
 
         return {
             "settings": settings,
-            "days": visible_days,
+            "days": days_desc,
             "today": today,
             "today_state": today_state,
             "savings": savings,
