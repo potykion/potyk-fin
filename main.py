@@ -143,11 +143,15 @@ def create_app() -> Flask:
         return render_template("index.html", **index_context(**kwargs))
 
     @app.route("/")
+    def root():
+        return redirect(url_for("index"))
+
+    @app.route("/fin")
     @login_required
     def index():
         return render_index()
 
-    @app.post("/expenses")
+    @app.post("/fin/expenses")
     @login_required
     def add_expense():
         form = ExpenseForm()
@@ -178,7 +182,7 @@ def create_app() -> Flask:
         flash("Трата добавлена", "success")
         return redirect(url_for("index"))
 
-    @app.post("/expenses/<int:expense_id>/delete")
+    @app.post("/fin/expenses/<int:expense_id>/delete")
     @login_required
     def delete_expense(expense_id: int):
         form = DeleteForm()
@@ -195,7 +199,7 @@ def create_app() -> Flask:
         flash("Трата удалена", "success")
         return redirect(url_for("index"))
 
-    @app.post("/savings")
+    @app.post("/fin/savings")
     @login_required
     def add_saving():
         form = SavingForm()
@@ -214,7 +218,7 @@ def create_app() -> Flask:
         flash("Сейв зафиксирован", "success")
         return redirect(url_for("index"))
 
-    @app.post("/savings/<int:saving_id>/delete")
+    @app.post("/fin/savings/<int:saving_id>/delete")
     @login_required
     def delete_saving(saving_id: int):
         form = DeleteForm()
@@ -231,7 +235,7 @@ def create_app() -> Flask:
         flash("Сейв удалён", "success")
         return redirect(url_for("index"))
 
-    @app.post("/settings/budget")
+    @app.post("/fin/settings/budget")
     @login_required
     def update_budget():
         form = BudgetForm()

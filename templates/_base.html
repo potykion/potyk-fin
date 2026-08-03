@@ -367,7 +367,7 @@
 </head>
 <body{% if config.DEBUG %} class="debug-env"{% endif %}>
 <header>
-    <a class="brand" href="/">potyk-fin</a>
+    <a class="brand" href="{{ url_for('index') }}">potyk-fin</a>
     <div class="spacer"></div>
     {% if current_user.is_authenticated %}
     <a href="https://www.tbank.ru/mybank/operations/" target="_blank" rel="noopener noreferrer">

@@ -23,7 +23,7 @@ def setup_login(app):
     def unauthorized():
         return redirect(url_for("login"))
 
-    @app.route("/login", methods=["GET", "POST"])
+    @app.route("/fin/login", methods=["GET", "POST"])
     def login():
         form = LoginForm()
         if form.is_submitted():
@@ -33,7 +33,7 @@ def setup_login(app):
             flash("неверный секрет", "error")
         return render_template("login.html", form=form)
 
-    @app.get("/logout")
+    @app.get("/fin/logout")
     @login_required
     def logout():
         logout_user()
