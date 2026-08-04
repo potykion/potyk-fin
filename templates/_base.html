@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>potyk-fin</title>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,20 +20,33 @@
             --bad-bg: #f8e8e8;
             --card: #fffdf8;
             --accent: #2a5a8c;
+            --pad-x: max(12px, env(safe-area-inset-left));
+            --pad-r: max(12px, env(safe-area-inset-right));
         }
 
         * { box-sizing: border-box; }
 
+        html {
+            width: 100%;
+            height: 100%;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
         body {
+            width: 100%;
             max-width: 720px;
+            min-height: 100%;
+            min-height: 100dvh;
             margin: 0 auto;
-            padding: 0 16px 48px;
+            padding: 0 var(--pad-r) calc(48px + env(safe-area-inset-bottom)) var(--pad-x);
             font-family: "Rubik", system-ui, sans-serif;
             color: var(--ink);
             background:
                 radial-gradient(ellipse at top right, #ebe6da 0%, transparent 55%),
                 var(--bg);
             position: relative;
+            overflow-x: clip;
         }
 
         body.debug-env::before {
@@ -60,12 +73,17 @@
             z-index: 1;
         }
 
+        main {
+            width: 100%;
+        }
+
         a { color: var(--accent); text-decoration: none; }
 
         header {
-            padding: 20px 0;
+            padding: 16px 0;
             display: flex;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 8px 12px;
             align-items: baseline;
         }
 
@@ -75,7 +93,11 @@
             color: var(--ink);
         }
 
-        header .spacer { flex-grow: 1; }
+        header .spacer { flex-grow: 1; min-width: 8px; }
+
+        header a:not(.brand) {
+            font-size: 0.9rem;
+        }
 
         hr {
             border: none;
@@ -192,21 +214,26 @@
             color: var(--ink);
         }
 
-        input {
-            padding: 8px 10px;
+        input, select {
+            width: 100%;
+            max-width: 100%;
+            padding: 10px 12px;
             border: 1px solid var(--line);
             border-radius: 6px;
             background: #fff;
+            font-size: 16px; /* iOS: без зума при фокусе */
         }
 
         button, .btn {
-            padding: 8px 12px;
+            padding: 10px 14px;
             border: 1px solid var(--ink);
             border-radius: 6px;
             background: var(--ink);
             color: #fff;
             cursor: pointer;
             font-weight: 500;
+            min-height: 44px;
+            touch-action: manipulation;
         }
 
         button.secondary, .btn.secondary {
@@ -222,16 +249,17 @@
             border: none;
             box-shadow: none;
             color: var(--muted);
-            padding: 0;
+            padding: 8px 4px;
             margin: 0;
             font-size: 0.75rem;
             font-weight: 400;
             line-height: 1;
             width: auto;
-            min-width: 0;
-            min-height: 0;
+            min-width: 44px;
+            min-height: 44px;
             height: auto;
             cursor: pointer;
+            touch-action: manipulation;
         }
 
         button.danger:hover,
@@ -276,7 +304,8 @@
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            align-items: baseline;
+            align-items: center;
+            max-width: 100%;
         }
 
         .day-head .badge {
@@ -302,6 +331,9 @@
             line-height: 1;
             padding: 2px 7px;
             border-radius: 4px;
+            min-height: 0;
+            min-width: 0;
+            touch-action: manipulation;
         }
 
         .day-head .add-expense-day:hover,
@@ -324,6 +356,13 @@
             background: #e8eef5;
             color: #2a4a6b;
         }
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -361,15 +400,108 @@
 
         .savings-list li {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 6px 10px;
             align-items: baseline;
-            padding: 6px 0;
+            padding: 8px 0;
             border-bottom: 1px solid var(--line);
             font-variant-numeric: tabular-nums;
         }
 
         .savings-list .amt { font-weight: 500; min-width: 5rem; }
-        .savings-list .note { flex: 1; color: var(--muted); font-size: 0.9rem; }
+        .savings-list .note { flex: 1 1 8rem; color: var(--muted); font-size: 0.9rem; word-break: break-word; }
+
+        @media (max-width: 559px) {
+            :root {
+                --pad-x: max(10px, env(safe-area-inset-left));
+                --pad-r: max(10px, env(safe-area-inset-right));
+            }
+
+            h1 { font-size: 1.2rem; }
+
+            .summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stat {
+                padding: 10px;
+            }
+
+            .stat .value {
+                font-size: 1.05rem;
+                word-break: break-word;
+            }
+
+            .day-head .badges {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .day-head .add-expense-day,
+            .day-head .add-saving-day {
+                min-width: 36px;
+                min-height: 36px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+            }
+
+            /* Лента трат: карточки вместо узкой таблицы */
+            .day .table-wrap table,
+            .day .table-wrap thead,
+            .day .table-wrap tbody,
+            .day .table-wrap th,
+            .day .table-wrap td,
+            .day .table-wrap tr {
+                display: block;
+                width: 100%;
+            }
+
+            .day .table-wrap thead { display: none; }
+
+            .day .table-wrap tr {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                padding: 10px 12px;
+                margin-bottom: 8px;
+            }
+
+            .day .table-wrap td {
+                border: none;
+                padding: 2px 0;
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                align-items: baseline;
+            }
+
+            .day .table-wrap td::before {
+                content: attr(data-label);
+                color: var(--muted);
+                font-size: 0.75rem;
+                font-weight: 500;
+                flex-shrink: 0;
+            }
+
+            .day .table-wrap td.num {
+                text-align: left;
+            }
+
+            .day .table-wrap td:last-child {
+                justify-content: flex-end;
+                margin-top: 4px;
+                min-height: 28px;
+            }
+
+            .day .table-wrap td:last-child::before { content: none; }
+
+            .day .table-wrap td:first-child {
+                font-weight: 600;
+                font-size: 1.05rem;
+            }
+        }
     </style>
 </head>
 <body{% if config.DEBUG %} class="debug-env"{% endif %}>

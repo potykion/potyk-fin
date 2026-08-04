@@ -26,6 +26,7 @@
     </div>
 
     {% if day.expenses %}
+    <div class="table-wrap">
     <table>
         <thead>
         <tr>
@@ -39,10 +40,11 @@
         <tbody>
         {% for e in day.expenses %}
         <tr>
-            <td>{{ e.amount | rub }}</td>
-            <td>{{ e.category }}</td>
-            <td class="muted">{{ e.description or '—' }}</td>
-            <td class="num balance {% if e.running_balance < 0 %}bad{% elif e.running_balance > 0 %}ok{% endif %}">
+            <td data-label="Сумма">{{ e.amount | rub }}</td>
+            <td data-label="Категория">{{ e.category }}</td>
+            <td class="muted" data-label="Описание">{{ e.description or '—' }}</td>
+            <td class="num balance {% if e.running_balance < 0 %}bad{% elif e.running_balance > 0 %}ok{% endif %}"
+                data-label="Баланс">
                 {{ e.running_balance | rub }}
             </td>
             <td>
@@ -56,6 +58,7 @@
         {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <p class="empty">Трат нет</p>
     {% endif %}
