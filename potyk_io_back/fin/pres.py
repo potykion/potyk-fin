@@ -78,7 +78,7 @@ def index_context(
 
 
 def render_index(**kwargs):
-    return render_template("index.html", **index_context(**kwargs))
+    return render_template("potyk-fin/index.html", **index_context(**kwargs))
 
 
 @bp.route("/")
@@ -94,7 +94,7 @@ def add_expense():
     if not form.validate_on_submit():
         if is_htmx():
             ctx = index_context(open_panel="expense", expense_form=form)
-            return render_template("partials/_expense_form.html", **ctx)
+            return render_template("potyk-fin/partials/_expense_form.html", **ctx)
         flash_form_errors(form)
         return render_index(open_panel="expense", expense_form=form), 400
 
@@ -113,7 +113,7 @@ def add_expense():
             date=expense.date,
         )
         ctx = index_context(expense_form=fresh)
-        return render_template("partials/_expense_added.html", **ctx)
+        return render_template("potyk-fin/partials/_expense_added.html", **ctx)
 
     flash("Трата добавлена", "success")
     return redirect(url_for("fin.index"))

@@ -1,10 +1,10 @@
-{% extends '_base.html' %}
+{% extends 'potyk-fin/_base.html' %}
 
 {% block main %}
 <h1>Сегодня, {{ today.isoformat() }}</h1>
 
 <div id="summary-wrap">
-{% include "partials/_summary.html" %}
+{% include "potyk-fin/partials/_summary.html" %}
 </div>
 
 <div class="panel">
@@ -26,7 +26,7 @@
 <div class="panel">
     <details data-panel="expense" {% if open_panel == 'expense' %}open{% endif %}>
         <summary>Добавить трату</summary>
-        {% include "partials/_expense_form.html" %}
+        {% include "potyk-fin/partials/_expense_form.html" %}
     </details>
 </div>
 
@@ -73,7 +73,7 @@
 </div>
 
 <h2>Лента</h2>
-{% include "partials/_feed.html" %}
+{% include "potyk-fin/partials/_feed.html" %}
 
 <script>
 (() => {

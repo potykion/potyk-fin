@@ -31,7 +31,7 @@ def setup_login(app, bp):
                 login_user(SecretUser(form.secret.data))
                 return redirect(url_for("fin.index"))
             flash("неверный секрет", "error")
-        return render_template("login.html", form=form)
+        return render_template("potyk-fin/login.html", form=form)
 
     @bp.get("/logout")
     @login_required
