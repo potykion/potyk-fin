@@ -110,7 +110,10 @@
       if (!form) return;
       const amount = form.querySelector('[name="amount"]');
       const date = form.querySelector('[name="date"]');
-      if (amount) amount.value = saveBtn.dataset.amount;
+      if (amount) {
+        const raw = Number(saveBtn.dataset.amount) || 0;
+        amount.value = Math.round(raw / 1000) * 1000;
+      }
       if (date) date.value = saveBtn.dataset.date;
       panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
       if (amount) amount.focus();
