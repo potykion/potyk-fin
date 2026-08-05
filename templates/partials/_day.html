@@ -48,7 +48,7 @@
                 {{ e.running_balance | rub }}
             </td>
             <td>
-                <form class="inline-form" method="post" action="{{ url_for('delete_expense', expense_id=e.id) }}"
+                <form class="inline-form" method="post" action="{{ url_for('fin.delete_expense', expense_id=e.id) }}"
                       onsubmit="return confirm('Удалить трату?')">
                     {{ delete_form.hidden_tag() }}
                     {{ delete_form.submit(class_='danger') }}

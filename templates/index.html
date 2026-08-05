@@ -10,7 +10,7 @@
 <div class="panel">
     <details data-panel="budget" {% if open_panel == 'budget' %}open{% endif %}>
         <summary>Изменить бюджет на день</summary>
-        <form class="grid cols-2" method="post" action="{{ url_for('update_budget') }}">
+        <form class="grid cols-2" method="post" action="{{ url_for('fin.update_budget') }}">
             {{ budget_form.hidden_tag() }}
             <label class="full">
                 {{ budget_form.daily_budget.label.text }}
@@ -34,7 +34,7 @@
     <details data-panel="saving" {% if open_panel == 'saving' %}open{% endif %}>
         <summary>Зафиксировать сейв</summary>
         <p class="muted">Когда реально перевёл на накопительный в банке</p>
-        <form class="grid cols-2" method="post" action="{{ url_for('add_saving') }}">
+        <form class="grid cols-2" method="post" action="{{ url_for('fin.add_saving') }}">
             {{ saving_form.hidden_tag() }}
             <label>
                 {{ saving_form.amount.label.text }}
@@ -60,7 +60,7 @@
                 <span class="muted">{{ s.date.isoformat() }}</span>
                 <span class="amt">{{ s.amount | rub }}</span>
                 <span class="note">{{ s.note or '—' }}</span>
-                <form class="inline-form" method="post" action="{{ url_for('delete_saving', saving_id=s.id) }}"
+                <form class="inline-form" method="post" action="{{ url_for('fin.delete_saving', saving_id=s.id) }}"
                       onsubmit="return confirm('Удалить сейв?')">
                     {{ delete_form.hidden_tag() }}
                     {{ delete_form.submit(class_='danger') }}

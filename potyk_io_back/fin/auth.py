@@ -1,7 +1,7 @@
 from flask import flash, redirect, render_template, url_for
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
 
-from forms import LoginForm
+from potyk_io_back.fin.forms import LoginForm
 
 
 class SecretUser(UserMixin):
@@ -12,7 +12,7 @@ class SecretUser(UserMixin):
         return self.secret
 
 
-def setup_login(app):
+def setup_login(app, bp):
     login_manager = LoginManager()
 
     @login_manager.user_loader
@@ -21,22 +21,22 @@ def setup_login(app):
 
     @login_manager.unauthorized_handler
     def unauthorized():
-        return redirect(url_for("login"))
+        return redirect(url_for("fin.login"))
 
-    @app.route("/fin/login", methods=["GET", "POST"])
+    @bp.route("/login", methods=["GET", "POST"])
     def login():
         form = LoginForm()
         if form.is_submitted():
             if form.validate():
                 login_user(SecretUser(form.secret.data))
-                return redirect(url_for("index"))
+                return redirect(url_for("fin.index"))
             flash("неверный секрет", "error")
         return render_template("login.html", form=form)
 
-    @app.get("/fin/logout")
+    @bp.get("/logout")
     @login_required
     def logout():
         logout_user()
-        return redirect(url_for("login"))
+        return redirect(url_for("fin.login"))
 
     login_manager.init_app(app)

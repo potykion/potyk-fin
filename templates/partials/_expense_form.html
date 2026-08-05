@@ -1,8 +1,8 @@
 <form id="expense-form"
       class="grid cols-2"
       method="post"
-      action="{{ url_for('add_expense') }}"
-      hx-post="{{ url_for('add_expense') }}"
+      action="{{ url_for('fin.add_expense') }}"
+      hx-post="{{ url_for('fin.add_expense') }}"
       hx-target="#expense-form"
       hx-swap="outerHTML">
     {{ expense_form.hidden_tag() }}

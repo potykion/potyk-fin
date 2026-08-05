@@ -2,7 +2,7 @@
 
 {% block main %}
 <h1>Вход</h1>
-<form class="grid" method="post" action="{{ url_for('login') }}" style="max-width: 320px;">
+<form class="grid" method="post" action="{{ url_for('fin.login') }}" style="max-width: 320px;">
     {{ form.hidden_tag() }}
     <label>
         {{ form.secret.label.text }}
